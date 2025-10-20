@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Base colors */
+    --background: 0 0% 100%;
+    --foreground: 208 78% 15%;
+    
+    /* Professional brand colors - Dark Blue & Orange */
+    --primary: 208 78% 15%; /* #0A2647 - Dark Blue */
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 208 78% 20%;
+    
+    --secondary: 27 87% 67%; /* #F4A261 - Orange */
+    --secondary-foreground: 208 78% 15%;
+    --secondary-hover: 27 87% 60%;
+    
+    /* UI elements */
+    --card: 0 0% 100%;
+    --card-foreground: 208 78% 15%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 208 78% 15%;
+    
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    
+    --accent: 27 87% 95%;
+    --accent-foreground: 208 78% 15%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 208 78% 15%;
+    
+    /* Success & Info */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+    
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(208 78% 15%), hsl(208 78% 25%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 40% 98%));
+    --gradient-accent: linear-gradient(135deg, hsl(27 87% 67%), hsl(27 87% 75%));
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(208 78% 15% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(208 78% 15% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(208 78% 15% / 0.1);
+    --shadow-glow: 0 0 20px hsl(27 87% 67% / 0.3);
+    
+    /* Animations */
+    --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease;
+    
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 208 78% 8%;
+    --foreground: 0 0% 98%;
+    
+    --primary: 27 87% 67%;
+    --primary-foreground: 208 78% 15%;
+    --primary-hover: 27 87% 60%;
+    
+    --secondary: 208 78% 20%;
+    --secondary-foreground: 0 0% 98%;
+    --secondary-hover: 208 78% 25%;
+    
+    --card: 208 78% 12%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 208 78% 12%;
+    --popover-foreground: 0 0% 98%;
+    
+    --muted: 208 50% 20%;
+    --muted-foreground: 215 20% 65%;
+    
+    --accent: 27 87% 20%;
+    --accent-foreground: 0 0% 98%;
+    
+    --border: 208 50% 20%;
+    --input: 208 50% 20%;
+    --ring: 27 87% 67%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
