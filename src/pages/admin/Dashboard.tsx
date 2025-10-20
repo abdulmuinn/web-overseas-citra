@@ -23,6 +23,7 @@ const Dashboard = () => {
     pendingApplications: 0,
   });
   const [loading, setLoading] = useState(true);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     fetchStats();
@@ -50,10 +51,6 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-
-  if (loading) {
-    return <div>{t('reports.loading') || 'Loading...'}</div>;
-  }
 
   const statCards = [
     {
@@ -85,7 +82,9 @@ const Dashboard = () => {
     },
   ];
 
-  const reduceMotion = useReducedMotion();
+  if (loading) {
+    return <div>{t('reports.loading') || 'Loading...'}</div>;
+  }
 
   return (
     <div className="max-w-7xl mx-auto">

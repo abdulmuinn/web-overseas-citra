@@ -31,6 +31,7 @@ const DashboardJobs = () => {
   const [loading, setLoading] = useState(true);
   const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     fetchJobs();
@@ -132,8 +133,6 @@ const DashboardJobs = () => {
   if (loading) {
     return <div>{t('common.loading') || 'Memuat...'}</div>;
   }
-
-  const reduceMotion = useReducedMotion();
 
   return (
     <div className="max-w-6xl mx-auto">
