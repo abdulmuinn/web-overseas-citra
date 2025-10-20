@@ -82,7 +82,7 @@ const DashboardJobs = () => {
       const { data, error } = await supabase
         .from("applications")
         .select("job_id")
-        .eq("user_id", user.id);
+        .eq("user_id", user2.id);
 
       if (error) throw error;
       setAppliedJobs(new Set(data?.map(app => app.job_id) || []));
