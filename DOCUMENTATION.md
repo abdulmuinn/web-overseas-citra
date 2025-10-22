@@ -26,6 +26,7 @@
 - Mengelola lowongan kerja (tambah, edit, hapus)
 - Melihat dan mengelola data peserta
 - Memproses aplikasi peserta
+- Menambah, melihat, dan menghapus catatan admin pada aplikasi peserta
 - Mengakses laporan dan statistik
 - Melihat grafik performa platform
 
@@ -65,7 +66,7 @@
    - Filter dan pencarian
 
 4. **Lamaran Saya** (`/dashboard/applications`)
-   - Status lamaran (pending, approved, rejected)
+   - Status lamaran (dikirim, seleksi, interview, diterima, berangkat, ditolak)
    - Riwayat aplikasi
    - Match score per aplikasi
 
@@ -91,13 +92,14 @@
 3. **Kelola Peserta** (`/admin/participants`)
    - Lihat semua peserta
    - Detail profil peserta
-   - Manage user roles
+   - Riwayat aplikasi per peserta
+   - Kelola catatan admin per aplikasi (tambah/hapus)
 
 4. **Laporan** (`/admin/reports`)
-   - Grafik aplikasi per bulan
-   - Statistik lowongan per negara
+   - Distribusi match score
    - Status aplikasi
-   - Export data
+   - Lowongan terpopuler (berdasarkan jumlah aplikasi)
+   - Peserta per negara tujuan
 
 ## 🗄️ Struktur Database
 
@@ -105,7 +107,7 @@
 - Data pribadi pengguna
 - Target negara, pendidikan, pengalaman
 - Bahasa yang dikuasai
-- Dokumen yang diupload
+- Dokumen yang diupload (metadata disimpan di kolom `documents` bertipe JSON)
 
 ### Tabel: `jobs`
 - Informasi lowongan kerja
@@ -115,20 +117,23 @@
 
 ### Tabel: `applications`
 - Lamaran kerja dari peserta
-- Link ke CV dan cover letter
-- Status (pending, approved, rejected)
-- Match score
+- Status dan match score
+- Relasi ke `jobs` dan `profiles`
+
+### Tabel: `application_notes`
+- Catatan admin per aplikasi peserta
+- Relasi ke `applications` dan admin (`profiles`)
 
 ### Tabel: `user_roles`
 - Role pengguna (admin/participant)
-- Digunakan untuk authorization
+- Digunakan untuk authorization lanjut melalui fungsi `has_role`
 
 ## 🔐 Keamanan & Authorization
 
 ### Row Level Security (RLS)
 - Peserta hanya bisa melihat data mereka sendiri
-- Admin bisa melihat semua data
-- File storage terproteksi per user
+- Admin bisa melihat semua data sesuai kebijakan
+- File storage terproteksi per user (berdasarkan folder `auth.uid()`)
 
 ### Authentication
 - Email & password authentication
@@ -141,6 +146,11 @@
 - RLS policies untuk akses file
 - Max upload: 5MB per file
 - Format: PDF, DOC, DOCX, JPG, PNG
+
+### Manajemen Role
+- Role pengguna dikelola melalui tabel `user_roles` dan fungsi `has_role(user_id, role)`
+- Beberapa kebijakan lama masih merujuk `profiles.role` untuk kompatibilitas; migrasi penuh ke `user_roles` sedang berlangsung
+- Admin memiliki akses lebih luas (mis. melihat semua dokumen dan catatan aplikasi)
 
 ## 🎨 Fitur UI/UX
 
@@ -156,7 +166,6 @@
 
 ### Animasi
 - Framer Motion untuk smooth transitions
-- Scroll animations di landing page
 - Loading states
 
 ### Components
@@ -171,6 +180,11 @@
 - Menjawab pertanyaan umum
 - Panduan penggunaan platform
 
+Integrasi teknis:
+- Menggunakan Supabase Edge Function `chat-assistant` yang memanggil Google Gemini 1.5 Flash
+- Set environment variable `GEMINI_API_KEY` di Supabase (Project Settings → Functions)
+- Frontend memanggil via `supabase.functions.invoke("chat-assistant", { body: { message } })`
+
 ### Job Matching Algorithm
 - Algoritma scoring berdasarkan:
   - Kesesuaian negara (30 poin)
@@ -178,6 +192,7 @@
   - Pendidikan (20 poin)
   - Kelengkapan profil (20 poin)
 - Score 0-100 untuk setiap aplikasi
+- Fungsi DB: `calculate_match_score(p_user_id, p_job_id)` dan trigger perhitungan otomatis saat insert ke `applications`
 
 ## 🛠️ Tech Stack
 
@@ -190,12 +205,13 @@
 - **React Router DOM** - Navigation
 - **i18next** - Internationalization
 - **Shadcn UI** - Component library
+- **Recharts** - Charting/visualisasi data
 
 ### Backend (Supabase)
 - **Authentication** - Email/password
 - **PostgreSQL** - Database
 - **Storage** - File uploads
-- **Edge Functions** - Chat assistant
+- **Edge Functions** - Chat assistant (Gemini 1.5 Flash)
 - **RLS Policies** - Data security
 
 ### State Management
@@ -205,14 +221,14 @@
 ## 📦 Deployment
 
 ### Hosting
-- Frontend 
-- Auto-deployment on push
+- Frontend (Vite) dapat di-deploy ke Netlify/Vercel
+- Dev server lokal: `npm run dev` pada `http://localhost:8080`
 - Custom domain support
 
 ### Environment Variables
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_PUBLISHABLE_KEY`
-- `VITE_SUPABASE_PROJECT_ID`
+- `VITE_SUPABASE_URL` (wajib)
+- `VITE_SUPABASE_PUBLISHABLE_KEY` atau `VITE_SUPABASE_ANON_KEY` (pilih salah satu)
+- `GEMINI_API_KEY` (diset di Supabase untuk Edge Function `chat-assistant`)
 
 ## 🔄 User Flow
 
@@ -231,9 +247,9 @@
 2. Dashboard overview
 3. Tambah lowongan baru
 4. Review aplikasi masuk
-5. Update status aplikasi
-6. Lihat laporan & statistik
-7. Manage peserta
+5. Tambah catatan admin pada aplikasi
+6. Update status aplikasi
+7. Lihat laporan & statistik
 
 ## 📊 Metrics & Analytics
 
@@ -246,10 +262,10 @@
 - Lowongan per negara
 
 ### Reports
-- Grafik aplikasi bulanan
-- Distribusi lowongan per negara
+- Grafik distribusi match score
 - Status aplikasi (pie chart)
-- Export ke PDF/Excel (coming soon)
+- Top lowongan berdasarkan jumlah aplikasi
+- Peserta per negara tujuan
 
 ## 🚀 Future Enhancements
 
@@ -297,16 +313,17 @@ src/
 │   ├── config.ts
 │   └── locales/
 ├── integrations/     # Supabase
-└── lib/             # Utilities
+└── lib/              # Utilities
 ```
 
-### Best Practices
-- Gunakan semantic tokens untuk colors
-- Follow component composition pattern
-- Implement proper error handling
-- Use TypeScript types strictly
-- Keep components small & focused
-- Write reusable hooks
+### Supabase Setup
+- Terapkan migration di folder `supabase/migrations`:
+  - Pembuatan bucket storage `documents` (private) dengan RLS
+  - Fungsi `calculate_match_score` dan trigger penghitungan otomatis di `applications`
+  - Tabel `application_notes` beserta kebijakan RLS (insert oleh admin, select admin/pemilik, delete oleh admin)
+  - Skema role `user_roles` serta fungsi `has_role`
+- Deploy Edge Function chatbot `chat-assistant` dan set `GEMINI_API_KEY` di Project Settings → Functions
+- Siapkan `.env.local` untuk Vite berisi `VITE_SUPABASE_URL` dan `VITE_SUPABASE_PUBLISHABLE_KEY`/`VITE_SUPABASE_ANON_KEY`
 
 ## 📞 Support
 
@@ -318,5 +335,5 @@ Untuk pertanyaan atau bantuan:
 ---
 
 **Version:** 1.0.0  
-**Last Updated:** 2025-01-13  
+**Last Updated:** 2025-10-22  
 **Maintained by:** Citra Overseas Team
