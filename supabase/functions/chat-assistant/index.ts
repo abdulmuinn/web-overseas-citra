@@ -43,7 +43,7 @@ Jika ada pertanyaan yang tidak bisa kamu jawab, arahkan pengguna untuk menghubun
 
     // Panggil Gemini API
     const response = await fetch(
-     `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+     `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
