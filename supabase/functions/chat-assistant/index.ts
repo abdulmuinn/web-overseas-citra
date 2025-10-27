@@ -2,7 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -42,14 +43,38 @@ Jika ada pertanyaan yang tidak bisa kamu jawab, arahkan pengguna untuk menghubun
 
     // Panggil Gemini API
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
-      {
+     `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+     {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          // ==========================================================
+          // BAGIAN YANG DIPERBAIKI (MENGHILANGKAN system_instruction)
+          // ==========================================================
           contents: [
-            { parts: [{ text: `${systemPrompt}\n\nUser: ${message}` }] },
+            // 1. Ini adalah System Prompt Anda, disamarkan sebagai pesan user pertama
+            {
+              role: "user",
+              parts: [{ text: systemPrompt }],
+            },
+            // 2. Ini adalah balasan "palsu" dari AI untuk mengatur perannya
+            {
+              role: "model",
+              parts: [
+                {
+                  text: "Baik, saya adalah Citra Overseas Assistant. Ada yang bisa saya bantu hari ini?",
+                },
+              ],
+            },
+            // 3. Ini adalah pesan user yang sebenarnya
+            {
+              role: "user",
+              parts: [{ text: message }],
+            },
           ],
+          // ==========================================================
+          // AKHIR DARI PERBAIKAN
+          // ==========================================================
           generationConfig: {
             temperature: 0.7,
             maxOutputTokens: 512,
@@ -73,7 +98,6 @@ Jika ada pertanyaan yang tidak bisa kamu jawab, arahkan pengguna untuk menghubun
     const data = await response.json();
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      data?.candidates?.[0]?.output_text ||
       "Maaf, saya tidak dapat memproses permintaan Anda saat ini.";
 
     // Kirim hasil ke client
