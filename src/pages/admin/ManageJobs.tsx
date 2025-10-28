@@ -313,7 +313,7 @@ const ManageJobs = () => {
                   }
                 />
                 <Label htmlFor="is_active">
-                  {t("common.active") || "Active"}
+                  {t("aktif") || "Active"}
                 </Label>
               </div>
 
@@ -361,7 +361,7 @@ const ManageJobs = () => {
                   <div className="flex items-center gap-2">
                     <Badge variant={job.is_active ? "default" : "secondary"}>
                       {job.is_active
-                        ? t("common.active") || "Active"
+                        ? t("aktif") || "Active"
                         : t("jobs.inactive") || "Inactive"}
                     </Badge>
                   </div>
